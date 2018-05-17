@@ -1,17 +1,38 @@
 var viewer;
-var inflation = false;
 var degP = 0;
+var controls;
 
-var binvoxV;
+
+//GUI
+var guiCtrl = function(){
+  this.limit_x = 100;
+  this.limit_y = 100;
+  this.limit_z = 100;
+};
+
+gui = new dat.GUI();
+guiObj = new guiCtrl();
+
+var folder = gui.addFolder('Folder');
+folder.add(guiObj, 'limit_x', 0, 100).onChange(setLimit_binvox);
+folder.add(guiObj, 'limit_y', 0, 100).onChange(setLimit_binvox);
+folder.add(guiObj, 'limit_z', 0, 100).onChange(setLimit_binvox);
+folder.open();
+
+
+function setLimit_binvox(){
+  viewer.binvoxV.setLimit([guiObj.limit_x, guiObj.limit_y, guiObj.limit_z]);
+}
+//end GUI
+
 
 
 
 $(window).on('load', function() {
   var modelName = 'models/bunny.stl';
   viewer = new Viewer('canvas-viewer', modelName);
-  controls = new THREE.OrbitControls(viewer.getCamera());
+  controls = new THREE.OrbitControls(viewer.camera, viewer.renderer.domElement);
 
-  binvoxV = new binvoxViewer();
 
   animate();
   eventListeners();
@@ -28,14 +49,11 @@ function animate() {
   requestAnimationFrame(animate);
   controls.update();
   viewer.render();
-  
+
+
   //viewer.loadMesh();
-
   //viewer.cameraPosition(90, degP);
-
   //degP += 1;
-
-
 
 }
 
@@ -55,6 +73,7 @@ function eventListeners() {
 }
 
 
+
 function onAddFile(event){
   var files;
   var reader = new FileReader();
@@ -68,8 +87,11 @@ function onAddFile(event){
   reader.onload = function(event){
     var raw = new Uint8Array(reader.result);
 
-    binvoxV.set_rawData(raw);
-    binvoxV.setVoxelToScene(viewer.getScene());
+    viewer.binvoxV.load(raw);
+
+    //gcodeTagaga.load(reader.result, viewer.scene);
+
+    viewer.binvoxV.setVoxelToScene();
 
   }
 
@@ -78,6 +100,8 @@ function onAddFile(event){
     document.getElementById("inputfile").value = '';
   }
 }
+
+
 
 function deg2rad(deg) {
   return deg*THREE.Math.DEG2RAD;

@@ -20,7 +20,7 @@ var Viewer = function (elementId, modelName) {
 
 
   //Objects
-  this.loadMesh();
+  //this.loadMesh();
   this.helpers();
 
 
@@ -39,7 +39,29 @@ var Viewer = function (elementId, modelName) {
   this.renderer.shadowMap.enabled = true;
   this.renderer.shadowMap.renderReverseSided = false;
   this.container.appendChild(this.renderer.domElement);
+
+
+  //binvox loader
+  this.binvoxV = new binvoxLoader([1.0, 1.0, 1.0], this.scene);
+
+
+
+
+
+
+
+
 };
+
+//function for binvox
+Viewer.prototype.setLimit_binvox = function() {
+
+  this.binvoxV.setLimit([guiObj.limit_x, guiObj.limit_y, guiObj.limit_z]);
+}
+
+
+
+//original
 
 Viewer.prototype.resize = function () {
   this.camera.aspect = this.container.clientWidth / this.container.clientHeight;
