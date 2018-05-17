@@ -249,6 +249,19 @@ var binvoxLoader = function(_areaSize, scene){
   this.limit = [100, 100, 100];
   this.scene = scene;
 
+
+  this.normals = new Array(6);
+
+  this.normals[0] = new THREE.Vector3(-1, 0, 0);
+  this.normals[1] = new THREE.Vector3(1, 0, 0);
+  this.normals[2] = new THREE.Vector3(0, -1, 0);
+  this.normals[3] = new THREE.Vector3(0, 1, 0);
+  this.normals[4] = new THREE.Vector3(0, 0, -1);
+  this.normals[5] = new THREE.Vector3(0, 0, 1);
+
+
+
+
 };
 
 binvoxLoader.prototype.load = function(_rawData){
@@ -398,35 +411,35 @@ binvoxLoader.prototype.setVoxelToScene = function(){
 
 
           if (mesh_flg[0] == true){
-            this.geometry.faces.push(new THREE.Face3(voxelCount*8 + 0, voxelCount*8 + 4, voxelCount*8 + 5));
-            this.geometry.faces.push(new THREE.Face3(voxelCount*8 + 1, voxelCount*8 + 0, voxelCount*8 + 5));
+            this.geometry.faces.push(new THREE.Face3(voxelCount*8 + 0, voxelCount*8 + 4, voxelCount*8 + 5, this.normals[0]));
+            this.geometry.faces.push(new THREE.Face3(voxelCount*8 + 1, voxelCount*8 + 0, voxelCount*8 + 5, this.normals[0]));
           }
 
           if (mesh_flg[1] == true){
-            this.geometry.faces.push(new THREE.Face3(voxelCount*8 + 3, voxelCount*8 + 2, voxelCount*8 + 6));
-            this.geometry.faces.push(new THREE.Face3(voxelCount*8 + 3, voxelCount*8 + 6, voxelCount*8 + 7));
+            this.geometry.faces.push(new THREE.Face3(voxelCount*8 + 3, voxelCount*8 + 2, voxelCount*8 + 6, this.normals[1]));
+            this.geometry.faces.push(new THREE.Face3(voxelCount*8 + 3, voxelCount*8 + 6, voxelCount*8 + 7, this.normals[1]));
           }
 
 
           if (mesh_flg[2] == true){
-            this.geometry.faces.push(new THREE.Face3(voxelCount*8 + 2, voxelCount*8 + 1, voxelCount*8 + 5));
-            this.geometry.faces.push(new THREE.Face3(voxelCount*8 + 5, voxelCount*8 + 6, voxelCount*8 + 2));
+            this.geometry.faces.push(new THREE.Face3(voxelCount*8 + 2, voxelCount*8 + 1, voxelCount*8 + 5, this.normals[2]));
+            this.geometry.faces.push(new THREE.Face3(voxelCount*8 + 5, voxelCount*8 + 6, voxelCount*8 + 2, this.normals[2]));
           }
 
           if (mesh_flg[3] == true){
-            this.geometry.faces.push(new THREE.Face3(voxelCount*8 + 0, voxelCount*8 + 3, voxelCount*8 + 7));
-            this.geometry.faces.push(new THREE.Face3(voxelCount*8 + 7, voxelCount*8 + 4, voxelCount*8 + 0));
+            this.geometry.faces.push(new THREE.Face3(voxelCount*8 + 0, voxelCount*8 + 3, voxelCount*8 + 7, this.normals[3]));
+            this.geometry.faces.push(new THREE.Face3(voxelCount*8 + 7, voxelCount*8 + 4, voxelCount*8 + 0, this.normals[3]));
           }
 
 
           if (mesh_flg[4] == true){
-            this.geometry.faces.push(new THREE.Face3(voxelCount*8 + 6, voxelCount*8 + 5, voxelCount*8 + 4));
-            this.geometry.faces.push(new THREE.Face3(voxelCount*8 + 6, voxelCount*8 + 4, voxelCount*8 + 7));
+            this.geometry.faces.push(new THREE.Face3(voxelCount*8 + 6, voxelCount*8 + 5, voxelCount*8 + 4, this.normals[4]));
+            this.geometry.faces.push(new THREE.Face3(voxelCount*8 + 6, voxelCount*8 + 4, voxelCount*8 + 7, this.normals[4]));
           }
 
           if (mesh_flg[5] == true){
-            this.geometry.faces.push(new THREE.Face3(voxelCount*8 + 0, voxelCount*8 + 1, voxelCount*8 + 2));
-            this.geometry.faces.push(new THREE.Face3(voxelCount*8 + 2, voxelCount*8 + 3, voxelCount*8 + 0));
+            this.geometry.faces.push(new THREE.Face3(voxelCount*8 + 0, voxelCount*8 + 1, voxelCount*8 + 2, this.normals[5]));
+            this.geometry.faces.push(new THREE.Face3(voxelCount*8 + 2, voxelCount*8 + 3, voxelCount*8 + 0, this.normals[5]));
           }
 
           if(mesh_flg.indexOf(true) > -1){
