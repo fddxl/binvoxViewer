@@ -242,28 +242,6 @@ class binvoxLoader{
 
 /////////////
 
-var Human = function(_age, _height){
-  this.age = _age;
-  this.height = height;
-}
-
-
-Human.prototype.get_age = function(){
-  return this.age;
-};
-
-Human.prototype.doubleAge = function(){
-  this.age = this.age*2;
-
-  this.hoge = 10;
-
-};
-
-
-
-
-
-
 
 var binvoxLoader = function(_areaSize, scene){
 
