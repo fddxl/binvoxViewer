@@ -240,7 +240,155 @@ class binvoxLoader{
 
 
 
-/////////////
+
+var BinvoxLoader = function( manager ){
+  this.manager = (manager != undefined ) ? manager : THREE.DefaultLoadingManager;
+
+};
+
+
+BinvoxLoader.prototype.load = function(url, onLoad, onProgress, onError){
+  var scope = this;
+
+  var loader = new THREE.FileLoader(scope.manager);
+  loader.setResponseType('arraybuffer');
+  loader.load(url, function(text){
+    try{
+      onLoad( scope.parse(text));
+
+    } catch (exception){
+      if ( onError){
+        onError(exception);
+      }
+    }
+  }, onProgress, onError);
+
+};
+
+BinvoxLoader.prototype.parse = function(data){
+
+  var geometry;
+
+  var headerData = '';
+  var voxelData = [];
+  var flg_headerEnd = false;
+
+  //Get Header Data
+  for ( var i=0; i<data.length; i++){
+
+    //check header data
+    if ( flg_headerEnd != true){
+      if( data[i] >= 32 && data[i] <= 126 || data[i] == 10){
+        headerData += String.fromCharCode(data[i]);
+      }
+    }
+
+    //read voxel data
+    if(flg_headerEnd == true){
+      voxelData.push(data[i]);
+
+    //check header is end or not
+    }else{
+      var tmp = headerData.slice(headerData.length-4, headerData.length-2);
+      if (tmp[0] == 'd' && tmp[1] == 'a'){
+        flg_headerEnd = true;
+        //magic code
+        i++;
+      }
+    }
+
+  }
+
+  var tmpStr = headerData.split('\n');
+
+  var dimData = tmpStr[1].split(' ');
+  this.dim = [parseInt(dimData[1], 10), parseInt(dimData[2], 10), parseInt(dimData[3],10)];
+  var translateData = tmpStr[2].split(' ');
+  this.translate = [parseFloat(translateData[1]), parseFloat(translateData[2]), parseFloat(translateData[3])];
+  var scaleData = tmpStr[3].split(' ');
+  this.scale = parseFloat(scaleData[1]);
+
+  //==Get Header Data==
+
+
+
+  this.voxel_rawData =　(new Array(this.dim[0])).fill(false);
+  for(let i = 0; i<this.dim[0]; i++){
+    this.voxel_rawData[i] = new Array(this.dim[1]).fill(false);
+
+    for(let j=0; j<this.dim[1]; j++){
+      this.voxel_rawData[i][j] = new Array(this.dim[2]).fill(false);
+    }
+  }
+
+  var indexX = 0;
+  var indexY = 0;
+  var indexZ = 0;
+
+  for(var i=0; i<voxelData.length; i+=2){
+
+    if(voxelData[i] == 0){
+      for(var j=0; j<voxelData[i+1]; j++){
+
+        indexX += 1;
+        if(indexX >= this.dim[0]){
+          indexX = 0;
+          indexY +=1;
+        }
+        if(indexY >= this.dim[1]){
+          indexY = 0;
+          indexZ += 1;
+        }
+
+      }
+    }else if(voxelData[i] == 1){
+
+      for(var j=0; j<voxelData[i+1]; j++){
+
+        this.voxel_rawData[indexX][indexY][indexZ] = true;
+
+        indexX += 1;
+        if(indexX >= this.dim[0]){
+          indexX = 0;
+          indexY +=1;
+        }
+        if(indexY >= this.dim[1]){
+          indexY = 0;
+          indexZ += 1;
+        }
+
+      }
+    }
+  }
+
+
+  //3-dimension bool data;
+  return this.voxel_rawData;
+}
+
+
+BinvoxLoader.prototype.getDim = function(){
+  return this.dim;
+}
+
+BinvoxLoader.prototype.getScale = function(){
+  return this.scale;
+}
+
+BinvoxLoader.prototype.getTranslate = function(){
+  return this.translate;
+}
+
+BinvoxLoader.prototype.getVoxelData = function(){
+  return this.raw_voxelData;
+}
+
+
+
+
+
+
+//////pre-binvoxLoader///////
 
 
 var binvoxLoader = function(_areaSize, scene){
@@ -483,7 +631,6 @@ binvoxLoader.prototype.setLimit = function(_limit){
 
 
 };
-
 
 //getter
 binvoxLoader.prototype.getDim = function(){

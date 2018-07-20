@@ -8,6 +8,35 @@ var guiCtrl = function(){
   this.limit_x = 100;
   this.limit_y = 100;
   this.limit_z = 100;
+
+  this.move_x = 0;
+  this.move_y = 0;
+  this.move_z = 0;
+
+  this.booleanDifference = function(){
+    viewer.booleanDifference();
+
+  }
+
+  this.booleanUnion = function(){
+    viewer.booleanUnion();
+  }
+
+  this.booleanIntersection = function(){
+    viewer.booleanIntersection();
+  }
+
+  this.exportBinvox = function(){
+    viewer.exportBinvox();
+  }
+
+  this.reset = function(){
+    for(var i=0; i<3; i++){
+      folder.__controllers[i+3].setValue(0);
+    }
+    viewer.resetData();
+
+  }
 };
 
 gui = new dat.GUI();
@@ -17,11 +46,32 @@ var folder = gui.addFolder('Folder');
 folder.add(guiObj, 'limit_x', 0, 100).onChange(setLimit_binvox);
 folder.add(guiObj, 'limit_y', 0, 100).onChange(setLimit_binvox);
 folder.add(guiObj, 'limit_z', 0, 100).onChange(setLimit_binvox);
+
+//moving
+folder.add(guiObj, 'move_x', -100, 100).onChange(move_voxel);
+folder.add(guiObj, 'move_y', -100, 100).onChange(move_voxel);
+folder.add(guiObj, 'move_z', -100, 100).onChange(move_voxel);
+
+folder.add(guiObj, 'booleanDifference');
+folder.add(guiObj, 'booleanUnion');
+folder.add(guiObj, 'booleanIntersection');
+
+folder.add(guiObj, 'exportBinvox');
+
+folder.add(guiObj, 'reset');
+
+//moving
 folder.open();
 
 
 function setLimit_binvox(){
-  viewer.binvoxV.setLimit([guiObj.limit_x, guiObj.limit_y, guiObj.limit_z]);
+  viewer.setLimit_voxel([guiObj.limit_x, guiObj.limit_y, guiObj.limit_z]);
+}
+
+function move_voxel(){
+
+  viewer.move_voxel([parseInt(guiObj.move_x), parseInt(guiObj.move_y), parseInt(guiObj.move_z)]);
+
 }
 //end GUI
 
@@ -31,11 +81,12 @@ function setLimit_binvox(){
 $(window).on('load', function() {
   var modelName = 'models/bunny.stl';
   viewer = new Viewer('canvas-viewer', modelName);
+
   controls = new THREE.OrbitControls(viewer.camera, viewer.renderer.domElement);
 
 
   animate();
-  eventListeners();
+  //eventListeners();
 
 
 
@@ -57,6 +108,8 @@ function animate() {
 
 }
 
+
+/*
 function eventListeners() {
   $('#startInflation').on('click', function() {
     inflation = true;
@@ -71,6 +124,7 @@ function eventListeners() {
     viewer.exportSTL(filename);
   });
 }
+*/
 
 
 
@@ -87,11 +141,12 @@ function onAddFile(event){
   reader.onload = function(event){
     var raw = new Uint8Array(reader.result);
 
-    viewer.binvoxV.load(raw);
+    //viewer.binvoxV.load(raw);
+    viewer.loadBinvox(raw);
 
     //gcodeTagaga.load(reader.result, viewer.scene);
 
-    viewer.binvoxV.setVoxelToScene();
+    //viewer.binvoxV.setVoxelToScene();
 
   }
 
@@ -102,11 +157,30 @@ function onAddFile(event){
 }
 
 
+function onAddFile2(event){
+  var files;
+  var reader = new FileReader();
 
-function deg2rad(deg) {
-  return deg*THREE.Math.DEG2RAD;
-}
+  if(event.target.files){
+    files = event.target.files;
+  }else{
+    files = event.dataTransfer.files;
+  }
 
-function rad2deg(rad) {
-  return rad*THREE.Math.RAD2DEG;
+  reader.onload = function(event){
+    var raw = new Uint8Array(reader.result);
+
+    //viewer.binvoxV.load(raw);
+    viewer.loadBinvox2(raw);
+
+    //gcodeTagaga.load(reader.result, viewer.scene);
+
+    //viewer.binvoxV.setVoxelToScene();
+
+  }
+
+  if (files[0]){
+    reader.readAsArrayBuffer(files[0]);
+    document.getElementById("inputfile").value = '';
+  }
 }

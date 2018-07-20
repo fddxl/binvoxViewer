@@ -1,12 +1,12 @@
 var Viewer = function (elementId, modelName) {
 
-  this.cameraDistance = 1.0;
+  this.cameraDistance = 1000;
   //this.boxSize = 0.4418847653807891;
-  this.boxSize = 1;
+  this.boxSize = 500;
   this.container = document.getElementById(elementId);
 
   // Camera
-  this.camera = new THREE.PerspectiveCamera(45, this.container.clientWidth / this.container.clientHeight, 0.1, 15);
+  this.camera = new THREE.PerspectiveCamera(45, this.container.clientWidth / this.container.clientHeight, 0.1, 3500);
   this.camera.position.set(0, 0, this.cameraDistance);
   this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 
@@ -16,7 +16,7 @@ var Viewer = function (elementId, modelName) {
 
   // Scene
   this.scene = new THREE.Scene();
-  this.scene.fog = new THREE.Fog(0xffffff, 2, 15);
+  this.scene.fog = new THREE.Fog(0xffffff, 2, 3500);
 
 
   //Objects
@@ -42,8 +42,18 @@ var Viewer = function (elementId, modelName) {
 
 
   //binvox loader
-  this.binvoxV = new binvoxLoader([1.0, 1.0, 1.0], this.scene);
+  this.binvoxV = new binvoxLoader([100.0, 100.0, 100.0], this.scene);
 
+
+  //new binvoxLoader
+  this.binvoxV2 = new BinvoxLoader()
+
+  //voxelViewer
+  this.voxV = new VoxelViewer();
+
+
+  //transition data
+  this.firstTransition = [0,0,0];
 
 
 
@@ -54,9 +64,29 @@ var Viewer = function (elementId, modelName) {
 };
 
 //function for binvox
-Viewer.prototype.setLimit_binvox = function() {
+Viewer.prototype.setLimit_voxel = function() {
 
-  this.binvoxV.setLimit([guiObj.limit_x, guiObj.limit_y, guiObj.limit_z]);
+
+  if(this.geo!== undefined){
+
+    this.scene.remove(this.mesh);
+    this.geo.dispose();
+    this.material.dispose();
+  }
+
+
+  //this.binvoxV.setLimit([guiObj.limit_x, guiObj.limit_y, guiObj.limit_z]);
+  this.voxV.setLimit([guiObj.limit_x, guiObj.limit_y, guiObj.limit_z]);
+  this.geo = this.voxV.convertVoxelToGeometry(this.voxData, 1.0);
+  this.material = new THREE.MeshPhongMaterial({
+    color: 0xff0000
+  })
+
+  this.mesh = new THREE.Mesh(this.geo, this.material);
+  this.mesh.castShadow = true;
+
+  this.scene.add(this.mesh);
+
 }
 
 
@@ -72,6 +102,49 @@ Viewer.prototype.resize = function () {
 Viewer.prototype.render = function () {
   this.renderer.render(this.scene, this.camera);
 };
+
+
+
+Viewer.prototype.loadBinvox = function(data){
+  var scope = this;
+
+  filename = "../models/Bunny.binvox";
+  var loader = new BinvoxLoader();
+
+  this.voxData = loader.parse(data);
+
+  this.geo = this.voxV.convertVoxelToGeometry(this.voxData, 1.0);
+
+  this.material = new THREE.MeshPhongMaterial({
+    color: 0xff0000
+  })
+
+  this.mesh = new THREE.Mesh(this.geo, this.material);
+  this.mesh.castShadow = true;
+  this.scene.add(this.mesh);
+
+}
+
+Viewer.prototype.loadBinvox2 = function(data){
+  var scope = this;
+
+  filename = "../models/Bunny.binvox";
+  var loader = new BinvoxLoader();
+
+  this.voxData2 = loader.parse(data);
+
+
+  this.geo2 = this.voxV.convertVoxelToGeometry(this.voxData2, 1.0);
+
+  this.material2 = new THREE.MeshPhongMaterial({
+    color: 0x00ff00
+  })
+
+  this.mesh2 = new THREE.Mesh(this.geo2, this.material2);
+  this.mesh2.castShadow = true;
+  this.scene.add(this.mesh2);
+
+}
 
 
 
@@ -96,8 +169,6 @@ Viewer.prototype.loadMesh = function(){
     var mesh = new THREE.Mesh(geometry, material);
     this.scene.add(mesh);
   }
-
-
 
 
 
@@ -160,4 +231,189 @@ Viewer.prototype.getCamera = function(){
 
 Viewer.prototype.getScene = function(){
   return this.scene;
+}
+
+
+
+Viewer.prototype.move_voxel = function(_transition){
+  this.firstTransition = _transition;
+
+  this.voxV.move(_transition);
+
+  if(this.geo!== undefined){
+
+    this.scene.remove(this.mesh);
+    this.geo.dispose();
+    this.material.dispose();
+  }else{
+    return;
+  }
+
+  this.geo = this.voxV.convertVoxelToGeometry(this.voxData, 1.0);
+  this.material = new THREE.MeshPhongMaterial({
+    color: 0xff0000
+  })
+
+  this.mesh = new THREE.Mesh(this.geo, this.material);
+  this.mesh.castShadow = true;
+
+  this.scene.add(this.mesh);
+}
+
+
+
+
+//Boolean
+
+Viewer.prototype.booleanUnion = function(){
+
+  if(this.voxData !== undefined && this.voxData2 !== undefined){
+    var booler = new VoxelBoolean();
+
+    booler.setFirstVoxelData(this.voxData);
+    booler.setSecondVoxelData(this.voxData2);
+    booler.setFirstTransition(this.firstTransition);
+    booler.setSecondTransition([0,0,0]);
+    console.log(this.firstTransition);
+
+    var result = booler.booleanUnion();
+
+
+    this.scene.remove(this.mesh);
+    this.scene.remove(this.mesh2);
+    this.geo.dispose();
+    this.material.dispose();
+    this.geo2.dispose();
+    this.material2.dispose();
+
+    this.voxV.move([0,0,0]);
+
+    this.booledGeo = this.voxV.convertVoxelToGeometry(result, 1.0);
+    this.booledMaterial = new THREE.MeshPhongMaterial({
+      color: 0x0000ff
+    })
+
+    this.booledMesh = new THREE.Mesh(this.booledGeo, this.booledMaterial);
+    this.booledMesh.castShadow = true;
+
+    this.scene.add(this.booledMesh);
+
+
+
+
+  }else{
+    console.log("voxData is not eough");
+  }
+
+
+
+}
+
+Viewer.prototype.booleanDifference = function(){
+  if(this.voxData !== undefined && this.voxData2 !== undefined){
+    var booler = new VoxelBoolean();
+
+    booler.setFirstVoxelData(this.voxData);
+    booler.setSecondVoxelData(this.voxData2);
+    booler.setFirstTransition(this.firstTransition);
+    booler.setSecondTransition([0,0,0]);
+    console.log(this.firstTransition);
+
+    var result = booler.booleanDifference();
+
+
+    this.scene.remove(this.mesh);
+    this.scene.remove(this.mesh2);
+    this.geo.dispose();
+    this.material.dispose();
+    this.geo2.dispose();
+    this.material2.dispose();
+
+    this.booledGeo = this.voxV.convertVoxelToGeometry(result, 1.0);
+    this.booledMaterial = new THREE.MeshPhongMaterial({
+      color: 0x0000ff
+    })
+
+    this.booledMesh = new THREE.Mesh(this.booledGeo, this.booledMaterial);
+    this.booledMesh.castShadow = true;
+
+    this.scene.add(this.booledMesh);
+
+
+
+
+  }else{
+    console.log("voxData is not eough");
+  }
+}
+
+Viewer.prototype.booleanIntersection = function(){
+
+  if(this.voxData !== undefined && this.voxData2 !== undefined){
+    var booler = new VoxelBoolean();
+
+    booler.setFirstVoxelData(this.voxData);
+    booler.setSecondVoxelData(this.voxData2);
+    booler.setFirstTransition(this.firstTransition);
+    booler.setSecondTransition([0,0,0]);
+
+
+    var result = booler.booleanIntersection();
+
+
+    this.scene.remove(this.mesh);
+    this.scene.remove(this.mesh2);
+    this.geo.dispose();
+    this.material.dispose();
+    this.geo2.dispose();
+    this.material2.dispose();
+
+    this.booledGeo = this.voxV.convertVoxelToGeometry(result, 1.0);
+    this.booledMaterial = new THREE.MeshPhongMaterial({
+      color: 0x0000ff
+    })
+
+    this.booledMesh = new THREE.Mesh(this.booledGeo, this.booledMaterial);
+    this.booledMesh.castShadow = true;
+
+    this.scene.add(this.booledMesh);
+
+
+
+
+  }else{
+    console.log("voxData is not eough");
+  }
+
+}
+
+
+Viewer.prototype.exportBinvox = function(){
+  console.log("fuck you");
+  var bE = new BinvoxExporter();
+  bE.export();
+}
+
+
+Viewer.prototype.resetData = function(){
+    this.voxV.move([0,0,0]);
+
+  if(this.geo!== undefined){
+
+    this.scene.remove(this.mesh);
+    this.geo.dispose();
+    this.material.dispose();
+  }
+
+  if(this.geo2 !== undefined){
+    this.scene.remove(this.mesh2);
+    this.geo2.dispose();
+    this.material2.dispose();
+  }
+
+  if(this.booledGeo !== undefined){
+    this.scene.remove(this.booledMesh);
+    this.booledGeo.dispose();
+    this.booledMaterial.dispose();
+  }
 }
