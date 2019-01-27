@@ -52,17 +52,6 @@ VoxelViewer.prototype.convertVoxelToGeometry = function(voxelData, scale){
           geometry.vertices.push(
 
             /*
-            new THREE.Vector3( i*scale - areaSize[0]/2 , k*scale - areaSize[2]/2 + scale, j*scale - areaSize[1]/2),
-            new THREE.Vector3( i*scale - areaSize[0]/2 , k*scale - areaSize[2]/2 + scale, j*scale - areaSize[1]/2 + scale),
-            new THREE.Vector3( i*scale - areaSize[0]/2 + scale, k*scale - areaSize[2]/2 + scale, j*scale - areaSize[1]/2 + scale),
-            new THREE.Vector3( i*scale - areaSize[0]/2 + scale, k*scale - areaSize[2]/2 + scale, j*scale - areaSize[1]/2),
-
-            new THREE.Vector3( i*scale - areaSize[0]/2 , k*scale - areaSize[2]/2, j*scale - areaSize[1]/2),
-            new THREE.Vector3( i*scale - areaSize[0]/2 , k*scale - areaSize[2]/2, j*scale - areaSize[1]/2 + scale),
-            new THREE.Vector3( i*scale - areaSize[0]/2 + scale, k*scale - areaSize[2]/2, j*scale - areaSize[1]/2 + scale),
-            new THREE.Vector3( i*scale - areaSize[0]/2 + scale, k*scale - areaSize[2]/2, j*scale - areaSize[1]/2)
-            */
-
             new THREE.Vector3( i*scale + this.transition[0], k*scale + scale + this.transition[1], j*scale + this.transition[2]),
             new THREE.Vector3( i*scale + this.transition[0], k*scale + scale + this.transition[1], j*scale + scale + this.transition[2]),
             new THREE.Vector3( i*scale + scale + this.transition[0], k*scale + scale + this.transition[1], j*scale + scale + this.transition[2]),
@@ -72,6 +61,17 @@ VoxelViewer.prototype.convertVoxelToGeometry = function(voxelData, scale){
             new THREE.Vector3( i*scale + this.transition[0], k*scale + this.transition[1], j*scale + scale + this.transition[2]),
             new THREE.Vector3( i*scale + scale + this.transition[0] , k*scale + this.transition[1], j*scale  + scale + this.transition[2]),
             new THREE.Vector3( i*scale + scale + this.transition[0], k*scale + this.transition[1], j*scale + this.transition[2])
+            */
+
+            new THREE.Vector3( i*scale + this.transition[0] -dim[0]/2, k*scale + scale + this.transition[1] -dim[1]/2, j*scale + this.transition[2] -dim[2]/2),
+            new THREE.Vector3( i*scale + this.transition[0]-dim[0]/2, k*scale + scale + this.transition[1] -dim[1]/2, j*scale + scale + this.transition[2] -dim[2]/2),
+            new THREE.Vector3( i*scale + scale + this.transition[0]-dim[0]/2, k*scale + scale + this.transition[1] -dim[1]/2, j*scale + scale + this.transition[2] -dim[2]/2),
+            new THREE.Vector3( i*scale + scale + this.transition[0]-dim[0]/2, k*scale + scale + this.transition[1] -dim[1]/2, j*scale + this.transition[2] -dim[2]/2),
+
+            new THREE.Vector3( i*scale + this.transition[0] -dim[0]/2, k*scale + this.transition[1] -dim[1]/2, j*scale + this.transition[2] -dim[2]/2),
+            new THREE.Vector3( i*scale + this.transition[0] -dim[0]/2, k*scale + this.transition[1] -dim[1]/2, j*scale + scale + this.transition[2] -dim[2]/2),
+            new THREE.Vector3( i*scale + scale + this.transition[0] -dim[0]/2, k*scale + this.transition[1] -dim[1]/2, j*scale  + scale + this.transition[2] -dim[2]/2),
+            new THREE.Vector3( i*scale + scale + this.transition[0] -dim[0]/2, k*scale + this.transition[1] -dim[1]/2, j*scale + this.transition[2] -dim[2]/2)
 
           );
 

@@ -37,6 +37,15 @@ var guiCtrl = function(){
     viewer.resetData();
 
   }
+
+  this.buildInfill = function(){
+    //hoghoge
+    viewer.buildInfill();
+  }
+
+  this.exportPointCloud = function(){
+    viewer.exportPointCloud();
+  }
 };
 
 gui = new dat.GUI();
@@ -59,6 +68,9 @@ folder.add(guiObj, 'booleanIntersection');
 folder.add(guiObj, 'exportBinvox');
 
 folder.add(guiObj, 'reset');
+
+folder.add(guiObj, 'buildInfill');
+folder.add(guiObj, 'exportPointCloud');
 
 //moving
 folder.open();

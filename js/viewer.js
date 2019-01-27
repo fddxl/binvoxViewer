@@ -58,9 +58,6 @@ var Viewer = function (elementId, modelName) {
 
 
 
-
-
-
 };
 
 //function for binvox
@@ -74,12 +71,19 @@ Viewer.prototype.setLimit_voxel = function() {
     this.material.dispose();
   }
 
+  if(this.booledGeo !== undefined){
+    this.scene.remove(this.booledMesh);
+    this.booledGeo.dispose();
+    this.booledMaterial.dispose();
+  }
 
-  //this.binvoxV.setLimit([guiObj.limit_x, guiObj.limit_y, guiObj.limit_z]);
+
   this.voxV.setLimit([guiObj.limit_x, guiObj.limit_y, guiObj.limit_z]);
-  this.geo = this.voxV.convertVoxelToGeometry(this.voxData, 1.0);
+
+  //this.geo = this.voxV.convertVoxelToGeometry(this.voxData, 1.0);
+  this.geo = this.voxV.convertVoxelToGeometry(this.booledVoxData, 1.0);
   this.material = new THREE.MeshPhongMaterial({
-    color: 0xff0000
+    color: 0x00ff00
   })
 
   this.mesh = new THREE.Mesh(this.geo, this.material);
@@ -137,7 +141,7 @@ Viewer.prototype.loadBinvox2 = function(data){
   this.geo2 = this.voxV.convertVoxelToGeometry(this.voxData2, 1.0);
 
   this.material2 = new THREE.MeshPhongMaterial({
-    color: 0x00ff00
+    color: 0x0000ff
   })
 
   this.mesh2 = new THREE.Mesh(this.geo2, this.material2);
@@ -183,12 +187,14 @@ Viewer.prototype.loadMesh = function(){
 
 Viewer.prototype.helpers = function () {
   // Box
+  /*
   var box = new THREE.Box3();
   var boxSize = this.boxSize;
   box.setFromCenterAndSize(new THREE.Vector3(0, 0, 0), new THREE.Vector3(boxSize, boxSize, boxSize));
   var boxHelper = new THREE.Box3Helper(box, 0x777777);
   this.boxHelper = boxHelper;
   this.scene.add(boxHelper);
+  */
 
   // Sphere
   // var radius = Math.sin(deg2rad(22.5));
@@ -202,7 +208,7 @@ Viewer.prototype.addShadowedLight = function (x, y, z, color, intensity) {
   var directionalLight = new THREE.DirectionalLight(color, intensity);
   directionalLight.position.set(x, y, z);
   this.scene.add(directionalLight);
-  var d = 1;
+  var d = 100;
   directionalLight.shadow.camera.left = -d;
   directionalLight.shadow.camera.right = d;
   directionalLight.shadow.camera.top = d;
@@ -288,6 +294,7 @@ Viewer.prototype.booleanUnion = function(){
 
     this.voxV.move([0,0,0]);
 
+    this.booledVoxData = result;
     this.booledGeo = this.voxV.convertVoxelToGeometry(result, 1.0);
     this.booledMaterial = new THREE.MeshPhongMaterial({
       color: 0x0000ff
@@ -316,7 +323,8 @@ Viewer.prototype.booleanDifference = function(){
     booler.setFirstVoxelData(this.voxData);
     booler.setSecondVoxelData(this.voxData2);
     booler.setFirstTransition(this.firstTransition);
-    booler.setSecondTransition([0,0,0]);
+    booler.setFirstTransition([-this.voxData.length/2, -this.voxData[0].length/2, -this.voxData[0][0].length/2]);
+    booler.setSecondTransition([-this.voxData2.length/2, -this.voxData2[0].length/2, -this.voxData2[0][0].length/2]);
     console.log(this.firstTransition);
 
     var result = booler.booleanDifference();
@@ -329,9 +337,10 @@ Viewer.prototype.booleanDifference = function(){
     this.geo2.dispose();
     this.material2.dispose();
 
+    this.booledVoxData = result;
     this.booledGeo = this.voxV.convertVoxelToGeometry(result, 1.0);
     this.booledMaterial = new THREE.MeshPhongMaterial({
-      color: 0x0000ff
+      color: 0x00ff00
     })
 
     this.booledMesh = new THREE.Mesh(this.booledGeo, this.booledMaterial);
@@ -368,9 +377,10 @@ Viewer.prototype.booleanIntersection = function(){
     this.geo2.dispose();
     this.material2.dispose();
 
+    this.booledVoxData = result;
     this.booledGeo = this.voxV.convertVoxelToGeometry(result, 1.0);
     this.booledMaterial = new THREE.MeshPhongMaterial({
-      color: 0x0000ff
+      color: 0x00ff00
     })
 
     this.booledMesh = new THREE.Mesh(this.booledGeo, this.booledMaterial);
@@ -416,4 +426,77 @@ Viewer.prototype.resetData = function(){
     this.booledGeo.dispose();
     this.booledMaterial.dispose();
   }
+}
+
+
+
+//Infill Builder
+
+Viewer.prototype.buildInfill = function(){
+
+  var thick = 1;
+  var _baseVoxData = this.voxData;
+  var _infillVoxData = this.voxData2;
+
+
+  var builder = new InfillBuilder();
+
+  builder.setBaseVoxData(_baseVoxData);
+  builder.setInfillVoxData(_infillVoxData);
+  builder.setThickness(thick);
+
+  resultVoxData = builder.buildInfill();
+
+
+  this.scene.remove(this.mesh);
+  this.scene.remove(this.mesh2);
+  this.geo.dispose();
+  this.material.dispose();
+  this.geo2.dispose();
+  this.material2.dispose();
+
+  this.booledVoxData = resultVoxData;
+  this.booledGeo = this.voxV.convertVoxelToGeometry(resultVoxData, 1.0);
+  this.booledMaterial = new THREE.MeshPhongMaterial({
+    color: 0x00ffff
+  })
+
+  this.booledMesh = new THREE.Mesh(this.booledGeo, this.booledMaterial);
+  this.booledMesh.castShadow = true;
+
+  this.scene.add(this.booledMesh);
+
+  console.log("build infill done");
+
+}
+
+Viewer.prototype.exportPointCloud = function(){
+
+  var FileName = "hoge.txt"
+  var Stream = "";
+  for(var i=0; i<this.booledVoxData.length; i++){
+    for(var j=0; j<this.booledVoxData[0].length; j++){
+      for(var k=0; k<this.booledVoxData[0][0].length; k++){
+
+        if(this.booledVoxData[i][j][k]){
+          Stream += i.toString(10) + "," + j.toString(10) + "," + k.toString(10) + "\n";
+        }
+
+      }
+    }
+  }
+
+
+
+  if(window.navigator.msSaveBlob){
+    window.navigator.msSaveBlob(new Blob([Stream], { type: "text/plain" }), FileName);
+  }else{
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([Stream], { type: "text/plain" }));
+    a.download = FileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
 }

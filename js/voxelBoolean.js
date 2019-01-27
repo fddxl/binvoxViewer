@@ -1,25 +1,3 @@
-var VoxelData = function(_voxelData){
-
-  //voxelData : three-dimention Array
-  this.voxelData  = _voxelData;
-
-  this.dimension = [0,0,0];
-  this.dimension[0] = this.voxelData.length;
-  this.dimension[1] = this.voxelData[0].length;
-  this.dimension[2] = this.voxelData[0][0].length;
-
-
-  //transtion : array of [x, y, z]
-  this.transition = [0,0,0];
-
-}
-
-VoxelData.setTransition = function(_transition){
-  this.transition = _transition;
-}
-
-
-
 
 //VoxelBoolean
 
