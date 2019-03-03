@@ -37,7 +37,6 @@ var Viewer = function (elementId, modelName) {
   this.renderer.gammaInput = true;
   this.renderer.gammaOutput = true;
   this.renderer.shadowMap.enabled = true;
-  this.renderer.shadowMap.renderReverseSided = false;
   this.container.appendChild(this.renderer.domElement);
 
 
@@ -150,7 +149,60 @@ Viewer.prototype.loadBinvox2 = function(data){
 
 }
 
+Viewer.prototype.loadFAV = function(filename){
+  var scope = this;
+  var loader = new THREE.FAVLoader();
 
+  loader.load(filename, function (volumeList) {
+    for (var voxels of volumeList) {
+      var voxel_rawData = new Array(voxels.dimension.y).fill(false);
+
+      for (var i = 0; i < voxels.dimension.y; i++) {
+        voxel_rawData[i] = new Array(voxels.dimension.x).fill(false);
+
+        for (var j = 0; j < voxels.dimension.x; j++) {
+          voxel_rawData[i][j] = new Array(voxels.dimension.z).fill(false);
+        }
+      }
+
+      for (var i = 0; i < voxels.data.length; i++) {
+        var p = voxels.data[i];
+        voxel_rawData[p[0]][p[1]][p[2]] = true;
+      }
+
+      scope.voxData = voxel_rawData;
+      scope.geo = scope.voxV.convertVoxelToGeometry(scope.voxData, 1.0);
+      scope.material = new THREE.MeshPhongMaterial({color: 0xff0000});
+      scope.mesh = new THREE.Mesh(scope.geo, scope.material);
+      scope.mesh.castShadow = true;
+      scope.scene.add(scope.mesh);
+    }
+  });
+};
+
+Viewer.prototype.exportFAV = function(){
+  var cubes = [];
+
+  var geometry = new THREE.BoxGeometry(1, 1, 1);
+  var material = new THREE.MeshPhongMaterial({color:0xaaaaaa});
+
+  for (var i = 0; i < this.currentVoxData.length; i++) {
+    for (var j = 0; j < this.currentVoxData[0].length; j++) {
+      for (var k = 0; k < this.currentVoxData[0][0].length; k++) {
+        if (this.currentVoxData[i][j][k]) {
+          var cube = new THREE.Mesh(geometry, material);
+          cube.position.set(i, j, k);
+          cubes.push(cube);
+        }
+      }
+    }
+  }
+
+  var favExporter = new THREE.FAVExporter();
+  var data = favExporter.parse(cubes, {}, 1);
+  var blob = new Blob([data], {type: "application/xml"});
+  saveAs(blob, 'infill-builder.fav');
+};
 
 Viewer.prototype.loadMesh = function(){
   //var geometry = new THREE.BoxBufferGeometry(0.2, 0.2, 0.2);
@@ -399,7 +451,6 @@ Viewer.prototype.booleanIntersection = function(){
 
 
 Viewer.prototype.exportBinvox = function(){
-  console.log("fuck you");
   var bE = new BinvoxExporter();
   bE.export();
 }
@@ -465,9 +516,9 @@ Viewer.prototype.buildInfill = function(){
   this.booledMesh.castShadow = true;
 
   this.scene.add(this.booledMesh);
+  this.currentVoxData = resultVoxData;
 
   console.log("build infill done");
-
 }
 
 Viewer.prototype.exportPointCloud = function(){
