@@ -23,7 +23,7 @@ VoxelViewer.prototype.setLimit = function(_limit){
 }
 
 VoxelViewer.prototype.convertVoxelToGeometry = function(voxelData, scale){
-  geometry = new THREE.Geometry();
+  var geometry = new THREE.Geometry();
 
   var dim = [voxelData.length, voxelData[0].length, voxelData[0][0].length];
   var voxelCount = 0;

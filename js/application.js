@@ -30,6 +30,10 @@ var guiCtrl = function(){
     viewer.exportBinvox();
   }
 
+  this.exportFAV = function(){
+    viewer.exportFAV();
+  }
+
   this.reset = function(){
     for(var i=0; i<3; i++){
       folder.__controllers[i+3].setValue(0);
@@ -66,6 +70,7 @@ folder.add(guiObj, 'booleanUnion');
 folder.add(guiObj, 'booleanIntersection');
 
 folder.add(guiObj, 'exportBinvox');
+folder.add(guiObj, 'exportFAV');
 
 folder.add(guiObj, 'reset');
 
@@ -150,20 +155,21 @@ function onAddFile(event){
     files = event.dataTransfer.files;
   }
 
-  reader.onload = function(event){
-    var raw = new Uint8Array(reader.result);
+  reader.onload = function(){
+    // var raw = new Uint8Array(reader.result);
 
     //viewer.binvoxV.load(raw);
-    viewer.loadBinvox(raw);
+    // viewer.loadBinvox(raw);
 
     //gcodeTagaga.load(reader.result, viewer.scene);
 
     //viewer.binvoxV.setVoxelToScene();
 
+    viewer.loadFAV(reader.result);
   }
 
-  if (files[0]){
-    reader.readAsArrayBuffer(files[0]);
+  if (files[0]) {
+    reader.readAsDataURL(files[0]);
     document.getElementById("inputfile").value = '';
   }
 }
