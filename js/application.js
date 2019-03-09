@@ -156,21 +156,20 @@ function onAddFile(event){
   }
 
   reader.onload = function(){
-    // var raw = new Uint8Array(reader.result);
-
+    var raw = new Uint8Array(reader.result);
     //viewer.binvoxV.load(raw);
-    // viewer.loadBinvox(raw);
+    viewer.loadBinvox(raw);
 
     //gcodeTagaga.load(reader.result, viewer.scene);
 
     //viewer.binvoxV.setVoxelToScene();
 
-    viewer.loadFAV(reader.result);
+    // viewer.loadFAV(reader.result);
   }
 
   if (files[0]) {
-    reader.readAsDataURL(files[0]);
-    document.getElementById("inputfile").value = '';
+    reader.readAsArrayBuffer(files[0]);
+    // document.getElementById("inputfile").value = '';
   }
 }
 
@@ -187,7 +186,6 @@ function onAddFile2(event){
 
   reader.onload = function(event){
     var raw = new Uint8Array(reader.result);
-
     //viewer.binvoxV.load(raw);
     viewer.loadBinvox2(raw);
 
@@ -199,6 +197,6 @@ function onAddFile2(event){
 
   if (files[0]){
     reader.readAsArrayBuffer(files[0]);
-    document.getElementById("inputfile").value = '';
+    // document.getElementById("inputfile").value = '';
   }
 }

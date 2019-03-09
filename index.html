@@ -17,21 +17,21 @@
     	<div class="canvas-wrapper">
       	<div id="canvas-viewer" class="canvas"></div>
     	</div>
+      <form name="myform">
+  			<p>First Object</p>
+  			<input type="file" id="inputfile" onchange="onAddFile(event);">
+  			<br>
+  			<p>Second Object</p>
+  			<input type="file" id="inputfile" onchange="onAddFile2(event);">
+  		</form>
   	</div>
-		<form name="myform">
-			<p>First Object</p>
-			<input type="file" id="inputfile" onchange="onAddFile(event);">
-			<br>
-			<p>Second Object</p>
-			<input type="file" id="inputfile" onchange="onAddFile2(event);">
-		</form>
     <script src="js/FileSaver.js"></script>
     <script src="js/XMLWriter-1.0.0-min.js"></script>
     <script src="js/FAVLoader.js"></script>
     <script src="js/FAVExporter.js"></script>
     <script src="js/binvoxLoader.js" charset="utf-8"></script>
-  	<script src="js/VoxelBoolean.js" charset="utf-8"></script>
-  	<script src="js/BinvoxExporter.js" charset="utf-8"></script>
+  	<script src="js/voxelBoolean.js" charset="utf-8"></script>
+  	<script src="js/binvoxExporter.js" charset="utf-8"></script>
   	<script src="js/infillBuilder.js" charset="utf-8"></script>
   	<script src="js/voxelViewer.js" charset="utf-8"></script>
   	<script src="js/viewer.js" charset="utf-8"></script>
